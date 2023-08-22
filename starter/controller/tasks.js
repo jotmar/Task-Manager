@@ -1,3 +1,4 @@
+const { json } = require('express')
 const Task = require('../models/task')
 
 const getAllTasks = async (req, res) => {
@@ -37,8 +38,21 @@ const getTask = async (req, res) => {
   }
 }
 
-const updateTask = (req, res) => {
-  res.send('Update Task')
+const updateTask = async (req, res) => {
+  try {
+    const task = await Task.findOneAndUpdate({ _id: req.params.id }, req.body, {
+      new: true,
+      runValidators: true
+    })
+    if (!task) {
+      console.log("Couldn't find the task!")
+      return res.status(404).json({ msg: 'Task not found!' })
+    }
+    res.status(200).json({ task })
+  } catch (error) {
+    console.log("Couldn't update the task!")
+    res.status(500).json({ msg: 'Server error!', err: error })
+  }
 }
 
 const deleteTask = async (req, res) => {
